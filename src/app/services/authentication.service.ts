@@ -1,9 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Auth, authState,  updateProfile ,signInWithEmailAndPassword} from '@angular/fire/auth';
-import { createUserWithEmailAndPassword, UserInfo, 
-   getAuth, sendPasswordResetEmail} from '@angular/fire/auth';
-import { concatMap, from, Observable, of, switchMap } from 'rxjs';
+import { createUserWithEmailAndPassword, UserInfo,  sendPasswordResetEmail} from '@angular/fire/auth';
+import { concatMap, from, Observable, of} from 'rxjs';
 import { Router } from '@angular/router';
 
 @Injectable({

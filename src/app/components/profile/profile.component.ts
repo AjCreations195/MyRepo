@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component,OnDestroy, OnInit,ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { HotToastService } from '@ngneat/hot-toast';
 import { concatMap, Subscription, } from 'rxjs';
@@ -15,55 +15,57 @@ import { ProfileUser } from 'src/app/models/user.profile';
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
-export class ProfileComponent implements OnInit ,OnDestroy{
+export class ProfileComponent implements OnInit, OnDestroy {
 
   user$ = this.userService.currentUserProfile$;
 
   selectedValue = '';
-  Categories =['customer','employee']
+  Categories = ['customer', 'employee']
   imageChangedEvent: any = '';
   croppedImage: any = '';
-  userSub!:Subscription;
+  userSub!: Subscription;
   profileForm = new FormGroup({
-    uid:new FormControl(''),
-    displayName:new FormControl(''),
-    firstName:new FormControl(''),
-    lastName:new FormControl(''),
-    phone:new FormControl(''),
-    category:new FormControl('')
+    uid: new FormControl(''),
+    displayName: new FormControl(''),
+    firstName: new FormControl(''),
+    lastName: new FormControl(''),
+    phone: new FormControl(''),
+    category: new FormControl('')
   })
-    
+
   constructor(private authService: AuthenticationService,
     private router: Router,
     private toast: HotToastService,
     private imageUploadService: ImageUploadService,
-    private userService:UsersService) { }
+    private userService: UsersService,
+    private viewRef: ViewContainerRef) { }
 
 
   ngOnInit(): void {
-    this.userService.currentUserProfile$.subscribe((user)=>{
-      this.profileForm.patchValue({...user});
-      
+    this.userService.currentUserProfile$.subscribe((user) => {
+      this.profileForm.patchValue({ ...user });
+
     })
   }
- 
 
-  uploadImage(event: any, user: ProfileUser) {
-    this.imageUploadService.uploadImage(event.target.files[0], `images/profile/${user.uid}`).pipe(
+
+  onSaveImage(user: ProfileUser) {
+    this.imageUploadService.uploadImage(this.imageChangedEvent.target.files[0], `images/profile/${user.uid}`).pipe(
       this.toast.observe({
         loading: 'Image is uploading...',
         success: 'Image Uploaded Successfully',
         error: 'There was an error'
-      }), concatMap((photoURL) => this.userService.updateUser({ uid:user.uid, photoURL }))
+      }), concatMap((photoURL) => this.userService.updateUser({ uid: user.uid, photoURL }))
     ).subscribe();
+
   }
-  saveProfile(){
+  saveProfile() {
     const profileData = this.profileForm.value;
     this.userService.updateUser(profileData).pipe(
       this.toast.observe({
-        loading:'Updating data...',
-        success:'Data has been updatd!',
-        error:'There was an error in updating the data'
+        loading: 'Updating data...',
+        success: 'Data has been updatd!',
+        error: 'There was an error in updating the data'
       })
     )
   }
@@ -72,15 +74,17 @@ export class ProfileComponent implements OnInit ,OnDestroy{
 
   fileChangeEvent(event: any, user: ProfileUser): void {
     this.imageChangedEvent = event;
-    this.uploadImage(this.imageChangedEvent,user)
+
   }
+
   imageCropped(event: ImageCroppedEvent, user: ProfileUser) {
     this.croppedImage = event.base64
-   }
 
-   ngOnDestroy(): void {
-     if(this.userSub){
-       this.userSub.unsubscribe()
-     }
-   }
+  }
+
+  ngOnDestroy(): void {
+    if (this.userSub) {
+      this.userSub.unsubscribe()
+    }
+  }
 }
