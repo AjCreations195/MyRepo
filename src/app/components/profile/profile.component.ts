@@ -31,7 +31,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     displayName: new FormControl('', Validators.required),
     firstName: new FormControl(''),
     lastName: new FormControl(''),
-    phone: new FormControl(''),
+    phone: new FormControl('', [Validators.required, Validators.pattern(/^\d{10}$/)]),
     category: new FormControl('')
   })
 
@@ -72,7 +72,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         success: 'Data has been updatd!',
         error: 'There was an error in updating the data'
       })
-    )
+    ).subscribe()
   }
 
   onFileSelected(event: any) { }

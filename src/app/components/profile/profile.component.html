@@ -32,7 +32,10 @@
                                     required!</mat-error>
                             </mat-form-field>
                             <mat-form-field>
-                                <input matInput type="tel" placeholder="phone" formControlName="phone">
+                                <input matInput type="number" placeholder="Contact Number" formControlName="phone">
+                                <mat-error *ngIf="profileForm.controls['phone'].getError('required')">Contact Number is
+                                    required!</mat-error>
+                                <mat-error *ngIf="profileForm.controls['phone'].getError('pattern')">Phone number must be 10 digis</mat-error>
                             </mat-form-field>
                         </div>
                     </div>
