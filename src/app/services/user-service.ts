@@ -18,7 +18,7 @@ export class UsersService {
                 console.log(user);
                 
                 const ref = doc(this.fireStore, 'users',user?.uid)
-             return docData(ref) as Observable<ProfileUser>;
+               return docData(ref) as Observable<ProfileUser>
               })
             )
           }

@@ -1,6 +1,6 @@
 .profile-image  > img {
     border-radius: 100%;
-    object-fit: cover;
+    object-fit: fill;
     object-position: center;
 }
 .profile-image{
@@ -25,3 +25,6 @@
     width:45%;
   
   }
+.photo{
+    height: 100px;
+}

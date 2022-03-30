@@ -1,11 +1,10 @@
-import { Component,OnDestroy, OnInit,ViewContainerRef } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { HotToastService } from '@ngneat/hot-toast';
 import { concatMap, Subscription, } from 'rxjs';
-import { User } from '@angular/fire/auth'
 import { AuthenticationService } from 'src/app/services/authentication.service';
 import { ImageUploadService } from 'src/app/services/image-upload.service';
-import { ImageCroppedEvent } from 'ngx-image-cropper';
+import { Dimensions, ImageCroppedEvent, base64ToFile } from 'ngx-image-cropper';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { UsersService } from 'src/app/services/user-service';
 import { ProfileUser } from 'src/app/models/user.profile';
@@ -17,16 +16,19 @@ import { ProfileUser } from 'src/app/models/user.profile';
 })
 export class ProfileComponent implements OnInit, OnDestroy {
 
+  @ViewChild('inputField') inputField!: ElementRef;
   user$ = this.userService.currentUserProfile$;
 
   selectedValue = '';
   Categories = ['customer', 'employee']
   imageChangedEvent: any = '';
   croppedImage: any = '';
+  cropperVisible = false;
   userSub!: Subscription;
+  fileToReturn!:File;
   profileForm = new FormGroup({
     uid: new FormControl(''),
-    displayName: new FormControl(''),
+    displayName: new FormControl('', Validators.required),
     firstName: new FormControl(''),
     lastName: new FormControl(''),
     phone: new FormControl(''),
@@ -37,8 +39,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private router: Router,
     private toast: HotToastService,
     private imageUploadService: ImageUploadService,
-    private userService: UsersService,
-    private viewRef: ViewContainerRef) { }
+    private userService: UsersService) { }
 
 
   ngOnInit(): void {
@@ -48,9 +49,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
     })
   }
 
+  onEditImage() {
+    this.inputField.nativeElement.click()
+  }
+
 
   onSaveImage(user: ProfileUser) {
-    this.imageUploadService.uploadImage(this.imageChangedEvent.target.files[0], `images/profile/${user.uid}`).pipe(
+    this.imageUploadService.uploadImage(this.fileToReturn, `images/profile/${user.uid}`).pipe(
       this.toast.observe({
         loading: 'Image is uploading...',
         success: 'Image Uploaded Successfully',
@@ -71,15 +76,43 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   onFileSelected(event: any) { }
-
+  imageLoaded() {
+    this.cropperVisible = true;
+    console.log('Image loaded');
+  }
   fileChangeEvent(event: any, user: ProfileUser): void {
     this.imageChangedEvent = event;
-
+    this.cropperVisible = true
   }
+  cropperReady(sourceImageDimensions: Dimensions) {
+    console.log('Cropper ready', sourceImageDimensions);
+  }
+
 
   imageCropped(event: ImageCroppedEvent, user: ProfileUser) {
     this.croppedImage = event.base64
+     this.fileToReturn = this.base64ToFile(
+      event.base64,
+      this.imageChangedEvent.target.files[0].name,
+    )
+    console.log(this.fileToReturn);
+    
+     return this.fileToReturn;
 
+  }
+  base64ToFile(data: any, filename: string) {
+
+    const arr = data.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    let u8arr = new Uint8Array(n);
+
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+
+    return new File([u8arr], filename, { type: mime });
   }
 
   ngOnDestroy(): void {

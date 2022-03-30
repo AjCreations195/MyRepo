@@ -20,9 +20,6 @@ export class AuthenticationService {
   }
   signUp(email:string,password:string){
     return from(createUserWithEmailAndPassword(this.auth,email,password))
-    // .pipe(
-    //   switchMap(({ user })=>updateProfile(user,{displayName:name,photoURL:file}))
-    // )
   }
 
   updateProfileData(profileData:Partial<UserInfo>):Observable<any>{
@@ -40,11 +37,8 @@ export class AuthenticationService {
 
   //forgot passsword
   forgotPassword(email:string){
-    return from(sendPasswordResetEmail(this.auth,email).then(()=>{
-      this.router.navigate(['/verify-email'])
-    },err =>{
-          alert('Something went wrong')
-        }))
+    return from(sendPasswordResetEmail(this.auth,email)
+    )
   }
   
 }
